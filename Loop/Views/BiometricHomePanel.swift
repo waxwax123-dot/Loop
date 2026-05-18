@@ -20,39 +20,14 @@ struct BiometricHomePanel: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header row matching Loop chart row style
-            HStack {
-                Text(NSLocalizedString("Biometrics", comment: "Biometrics panel section title"))
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                Spacer()
-                IRBadge(multiplier: currentMultiplier)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-
+            panelHeader
             Divider()
-
-            // Metric rows
-            ForEach(BiometricTileType.allCases) { tile in
-                MetricRow(
-                    tile: tile,
-                    snapshot: latestSnapshot,
-                    entry: irService.latestEntry
-                )
-                .contentShape(Rectangle())
-                .onTapGesture { selectedTile = tile }
-
-                if tile != BiometricTileType.allCases.last {
-                    Divider()
-                        .padding(.leading, 36)
-                }
-            }
+            metricList
         }
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(10)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .background(LoopDS.Colors.surface)
+        .cornerRadius(LoopDS.Radius.card)
+        .padding(.horizontal, LoopDS.Spacing.md)
+        .padding(.vertical, LoopDS.Spacing.sm)
         .onReceive(biometricsService.snapshotPublisher.receive(on: DispatchQueue.main)) { latestSnapshot = $0 }
         .onReceive(irService.multiplierPublisher.receive(on: DispatchQueue.main)) { currentMultiplier = $0 }
         .sheet(item: $selectedTile) { tile in
@@ -64,7 +39,41 @@ struct BiometricHomePanel: View {
         }
     }
 
-    // MARK: - Sub-views
+    // MARK: - Header
+
+    private var panelHeader: some View {
+        HStack {
+            Text(NSLocalizedString("Biometrics", comment: "Biometrics panel section title"))
+                .font(LoopDS.Typography.headline)
+                .foregroundColor(LoopDS.Colors.primary)
+            Spacer()
+            IRBadge(multiplier: currentMultiplier)
+        }
+        .padding(.horizontal, LoopDS.Spacing.md)
+        .padding(.vertical, LoopDS.Spacing.sm)
+    }
+
+    // MARK: - Metric list
+
+    private var metricList: some View {
+        ForEach(BiometricTileType.allCases) { tile in
+            MetricRow(
+                tile: tile,
+                snapshot: latestSnapshot,
+                entry: irService.latestEntry
+            )
+            .contentShape(Rectangle())
+            .onTapGesture { selectedTile = tile }
+
+            if tile != BiometricTileType.allCases.last {
+                Divider()
+                    // Indent divider past icon + label leading edge for visual grouping
+                    .padding(.leading, LoopDS.Spacing.md + 22 + LoopDS.Spacing.sm)
+            }
+        }
+    }
+
+    // MARK: - MetricRow
 
     private struct MetricRow: View {
         let tile: BiometricTileType
@@ -74,58 +83,58 @@ struct BiometricHomePanel: View {
         private var rawValue: Double? {
             guard let snapshot = snapshot else { return nil }
             switch tile {
-            case .sleep: return snapshot.sleepHours
-            case .steps: return snapshot.stepCount
-            case .hrv: return snapshot.hrvSDNN
+            case .sleep:    return snapshot.sleepHours
+            case .steps:    return snapshot.stepCount
+            case .hrv:      return snapshot.hrvSDNN
             case .exercise: return snapshot.exerciseMinutes
-            case .rhr: return snapshot.heartRate
+            case .rhr:      return snapshot.heartRate
             }
         }
 
         private var delta: Double? {
             guard let entry = entry else { return nil }
             switch tile {
-            case .sleep: return entry.sleepDelta
-            case .steps: return entry.stepsDelta
-            case .hrv: return entry.hrvDelta
+            case .sleep:    return entry.sleepDelta
+            case .steps:    return entry.stepsDelta
+            case .hrv:      return entry.hrvDelta
             case .exercise: return entry.exerciseDelta
-            case .rhr: return entry.rhrDelta
+            case .rhr:      return entry.rhrDelta
             }
         }
 
         private var formattedValue: String {
             guard let raw = rawValue else { return "--" }
             switch tile {
-            case .steps:
-                return String(format: "%.0f %@", raw, tile.unit)
-            default:
-                return String(format: "%.1f %@", raw, tile.unit)
+            case .steps: return String(format: "%.0f %@", raw, tile.unit)
+            default:     return String(format: "%.1f %@", raw, tile.unit)
             }
         }
 
         var body: some View {
-            HStack(spacing: 8) {
+            HStack(spacing: LoopDS.Spacing.sm) {
+                // Icon — biometricTint accent, fixed width for column alignment
                 Image(systemName: tile.icon)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .frame(width: 16)
+                    .font(.subheadline)
+                    .foregroundColor(LoopDS.Colors.biometricTint)
+                    .frame(width: 22, alignment: .center)
 
                 Text(tile.displayName)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(LoopDS.Typography.subheadline)
+                    .foregroundColor(LoopDS.Colors.secondary)
 
                 Spacer()
 
+                // Monospaced digit value — stays stable as data updates
                 Text(formattedValue)
-                    .font(.subheadline.bold())
-                    .foregroundColor(rawValue == nil ? .secondary : .primary)
+                    .font(LoopDS.Typography.metric)
+                    .foregroundColor(rawValue == nil ? LoopDS.Colors.secondary : LoopDS.Colors.primary)
 
                 if let d = delta {
                     DeltaChip(delta: d)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, LoopDS.Spacing.md)
+            .padding(.vertical, LoopDS.Spacing.sm + LoopDS.Spacing.xs)
             .accessibilityLabel(accessibilityLabel)
         }
 
@@ -136,41 +145,53 @@ struct BiometricHomePanel: View {
         }
     }
 
+    // MARK: - DeltaChip
+
     private struct DeltaChip: View {
         let delta: Double
 
+        // Positive delta raises IR (bad) = red; negative lowers IR (good) = green
+        private var chipColor: Color { delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe }
+
         var body: some View {
             Text(String(format: "%+.0f%%", delta))
-                .font(.caption2.bold())
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(delta >= 0 ? Color.red.opacity(0.15) : Color.green.opacity(0.15))
-                .foregroundColor(delta >= 0 ? .red : .green)
-                .cornerRadius(4)
+                .font(LoopDS.Typography.caption2.bold())
+                .padding(.horizontal, LoopDS.Spacing.sm - 2)
+                .padding(.vertical, LoopDS.Spacing.xs / 2)
+                .background(chipColor.opacity(0.15))
+                .foregroundColor(chipColor)
+                .cornerRadius(LoopDS.Radius.sm)
         }
     }
+
+    // MARK: - IRBadge
 
     private struct IRBadge: View {
         let multiplier: Double
 
-        private var color: Color {
-            if multiplier < 1.1 { return .green }
-            if multiplier < 1.5 { return .yellow }
-            return .red
+        private var badgeColor: Color {
+            if multiplier < 1.1 { return LoopDS.Colors.glucoseSafe }
+            if multiplier < 1.5 { return LoopDS.Colors.glucoseWarning }
+            return LoopDS.Colors.glucoseUrgent
         }
 
         var body: some View {
             Text(String(format: "IR \u{00D7}%.2f", multiplier))
-                .font(.caption.bold())
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(color.opacity(0.2))
-                .foregroundColor(color)
-                .cornerRadius(8)
+                .font(LoopDS.Typography.caption.bold())
+                .padding(.horizontal, LoopDS.Spacing.sm)
+                .padding(.vertical, LoopDS.Spacing.xs)
+                .background(badgeColor.opacity(0.18))
+                .foregroundColor(badgeColor)
+                .cornerRadius(LoopDS.Radius.sm)
                 .accessibilityLabel(
-                    String(format: NSLocalizedString("Insulin resistance multiplier %.2f", comment: "IR badge accessibility label"), multiplier)
+                    String(
+                        format: NSLocalizedString(
+                            "Insulin resistance multiplier %.2f",
+                            comment: "IR badge accessibility label"
+                        ),
+                        multiplier
+                    )
                 )
         }
     }
-
 }
