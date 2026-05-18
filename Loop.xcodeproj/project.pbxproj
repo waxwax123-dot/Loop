@@ -511,6 +511,7 @@
 		4A9E17B62C0F583DA81E92D0 /* SettingsView+biometricIRSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8F421D3B17A29EF0D845C1 /* SettingsView+biometricIRSection.swift */; };
 		F511D9CB8F68D9D9B0341314 /* AppleHealthIRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043BAE1603803A839C0CB52 /* AppleHealthIRService.swift */; };
 		E5A6E743849E63F8101AC616 /* BiometricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5534EA92B26FA8ADC30543F /* BiometricsService.swift */; };
+		F5AB5830F6FD4064877E4C82 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB35C7A245DC4A33B84F60B3 /* DesignSystem.swift */; };
 		C8C8050EED40EF171CC2784D /* AppleHealthIREntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8FD0BA84A167FE482ED4A92 /* AppleHealthIREntry.swift */; };
 		32E97CC31667BAF165D33764 /* AppleHealthIRThresholds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B34FA781359331A3ED13A /* AppleHealthIRThresholds.swift */; };
 		8B24F98B098D2F129A31E399 /* AppleHealthIRThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7D80FDFED273606F4C76FF /* AppleHealthIRThresholdsView.swift */; };
@@ -1340,6 +1341,7 @@
 		CC8F421D3B17A29EF0D845C1 /* SettingsView+biometricIRSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+biometricIRSection.swift"; sourceTree = "<group>"; };
 		A043BAE1603803A839C0CB52 /* AppleHealthIRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRService.swift; sourceTree = "<group>"; };
 		A5534EA92B26FA8ADC30543F /* BiometricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricsService.swift; sourceTree = "<group>"; };
+		EB35C7A245DC4A33B84F60B3 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		F8FD0BA84A167FE482ED4A92 /* AppleHealthIREntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIREntry.swift; sourceTree = "<group>"; };
 		638B34FA781359331A3ED13A /* AppleHealthIRThresholds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRThresholds.swift; sourceTree = "<group>"; };
 		3E7D80FDFED273606F4C76FF /* AppleHealthIRThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRThresholdsView.swift; sourceTree = "<group>"; };
@@ -1754,6 +1756,7 @@
 				C1EE9E802A38D0FB0064784A /* BuildDetails.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				1D12D3B82548EFDD00B53E8B /* main.swift */,
+				EB35C7A245DC4A33B84F60B3 /* DesignSystem.swift */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */,
@@ -3463,6 +3466,7 @@
 				8B24F98B098D2F129A31E399 /* AppleHealthIRThresholdsView.swift in Sources */,
 				DB9FA0D4AF211849B3A47ED1 /* BiometricHomePanel.swift in Sources */,
 				31CE692EDFCE0B5ECDC4C1DD /* BiometricIRDetailView.swift in Sources */,
+				F5AB5830F6FD4064877E4C82 /* DesignSystem.swift in Sources */,
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift in Sources */,
