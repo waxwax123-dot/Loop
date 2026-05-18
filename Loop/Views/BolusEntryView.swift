@@ -201,6 +201,7 @@ struct BolusEntryView: View {
         if viewModel.carbEntryAmountAndEmojiString != nil && viewModel.carbEntryDateAndAbsorptionTimeString != nil {
             HStack {
                 Text("Carb Entry", comment: "Label for carb entry row on bolus screen")
+                    .foregroundColor(LoopDS.Colors.carbTint)
 
                 Text(viewModel.carbEntryAmountAndEmojiString!)
                     .foregroundColor(Color(.carbTintColor))
