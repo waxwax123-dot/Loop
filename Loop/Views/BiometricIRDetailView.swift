@@ -262,20 +262,24 @@ struct BiometricIRDetailView: View {
         let entry: AppleHealthIREntry
         let tileType: BiometricTileType
 
+        private var delta: Double { tileType.delta(from: entry) }
+        private var deltaColor: Color { delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe }
+
         var body: some View {
-            HStack {
+            HStack(spacing: LoopDS.Spacing.sm) {
                 Text(entry.timestamp, style: .time)
-                    .foregroundColor(LoopDS.Colors.secondary)
                     .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
+                    .frame(width: 64, alignment: .leading)
                 Spacer()
-                let delta = tileType.delta(from: entry)
                 Text(String(format: "%+.1f%%", delta))
-                    .foregroundColor(delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe)
-                    .font(LoopDS.Typography.metric)
+                    .font(LoopDS.Typography.caption.monospacedDigit())
+                    .foregroundColor(deltaColor)
                 Text(entry.formattedMultiplier)
                     .font(LoopDS.Typography.caption)
                     .foregroundColor(LoopDS.Colors.secondary)
             }
+            .padding(.vertical, LoopDS.Spacing.xs)
         }
     }
 }

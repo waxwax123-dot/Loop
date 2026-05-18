@@ -142,7 +142,7 @@ extension CarbEntryView {
     private var warningsCard: some View {
         ForEach(Array(viewModel.warnings).sorted(by: { $0.priority < $1.priority })) { warning in
             warningView(for: warning)
-                .padding(.vertical, 8)
+                .padding(.vertical, LoopDS.Spacing.sm)
                 .padding(.horizontal)
                 .background(CardBackground())
                 .padding(.horizontal)
@@ -213,7 +213,7 @@ extension CarbEntryView {
         VStack(alignment: .leading, spacing: 6) {
             Text("FAVORITE FOODS", comment: "The section title for Carb entry screen where Favorite Foods can be selected")
                 .font(.footnote)
-                .foregroundColor(.secondary)
+                .foregroundColor(LoopDS.Colors.secondary)
                 .padding(.horizontal, 26)
             
             VStack(spacing: 10) {

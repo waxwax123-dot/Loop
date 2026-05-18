@@ -116,21 +116,27 @@ struct AppleHealthIRThresholdsView: View {
                     )
                 }
             } header: {
-                Text(NSLocalizedString("Biometric Thresholds", comment: "Settings section header"))
+                sectionHeader(NSLocalizedString("Biometric Thresholds", comment: "Settings section header"))
             }
 
             Section {
                 DisclosureGroup(isExpanded: $clampExpanded) {
                     HStack {
-                        Text(NSLocalizedString("Min multiplier", comment: "Settings label")).font(LoopDS.Typography.subheadline)
+                        Text(NSLocalizedString("Min multiplier", comment: "Settings label"))
+                            .font(LoopDS.Typography.subheadline)
+                            .foregroundColor(LoopDS.Colors.primary)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMin)
                     }
+                    .padding(.vertical, LoopDS.Spacing.xs)
                     HStack {
-                        Text(NSLocalizedString("Max multiplier", comment: "Settings label")).font(LoopDS.Typography.subheadline)
+                        Text(NSLocalizedString("Max multiplier", comment: "Settings label"))
+                            .font(LoopDS.Typography.subheadline)
+                            .foregroundColor(LoopDS.Colors.primary)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMax)
                     }
+                    .padding(.vertical, LoopDS.Spacing.xs)
                 } label: {
                     metricLabel(
                         name: NSLocalizedString("Multiplier Clamp", comment: "Settings metric label"),
@@ -138,12 +144,14 @@ struct AppleHealthIRThresholdsView: View {
                     )
                 }
             } header: {
-                Text(NSLocalizedString("Output", comment: "Settings section header"))
+                sectionHeader(NSLocalizedString("Output", comment: "Settings section header"))
             }
 
             if let error = validationError {
                 Section {
-                    Text(error).foregroundColor(LoopDS.Colors.glucoseUrgent).font(.footnote)
+                    Text(error)
+                        .font(LoopDS.Typography.caption)
+                        .foregroundColor(LoopDS.Colors.glucoseUrgent)
                 }
             }
         }
@@ -180,10 +188,22 @@ struct AppleHealthIRThresholdsView: View {
 
     // MARK: - Helper views
 
+    /// Styled section header with consistent typography and no auto-uppercasing.
+    @ViewBuilder
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(LoopDS.Typography.caption.bold())
+            .foregroundColor(LoopDS.Colors.secondary)
+            .textCase(nil)
+    }
+
+    /// DisclosureGroup label: metric name (primary) + current range summary (secondary).
     @ViewBuilder
     private func metricLabel(name: String, summary: String) -> some View {
         HStack {
-            Text(name).font(LoopDS.Typography.subheadline)
+            Text(name)
+                .font(LoopDS.Typography.subheadline)
+                .foregroundColor(LoopDS.Colors.primary)
             Spacer()
             Text(summary)
                 .font(LoopDS.Typography.caption)
@@ -191,19 +211,21 @@ struct AppleHealthIRThresholdsView: View {
         }
     }
 
+    /// Two-column grid: thresholds on the left, zone effects on the right.
     @ViewBuilder
     private func metricGrid(
         thresholds: [(String, Binding<Double>)],
         effects: [(String, Binding<Double>)]
     ) -> some View {
         VStack(spacing: LoopDS.Spacing.xs) {
-            HStack {
+            // Column headers
+            HStack(spacing: LoopDS.Spacing.sm) {
                 Text(NSLocalizedString("Thresholds", comment: "Grid column header"))
-                    .font(LoopDS.Typography.caption)
+                    .font(LoopDS.Typography.caption.bold())
                     .foregroundColor(LoopDS.Colors.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(NSLocalizedString("Effects", comment: "Grid column header"))
-                    .font(LoopDS.Typography.caption)
+                    .font(LoopDS.Typography.caption.bold())
                     .foregroundColor(LoopDS.Colors.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -217,6 +239,7 @@ struct AppleHealthIRThresholdsView: View {
                     EffectField(label: effects[i].0, value: effects[i].1)
                         .frame(maxWidth: .infinity)
                 }
+                .padding(.vertical, LoopDS.Spacing.xs)
             }
         }
         .padding(.vertical, LoopDS.Spacing.xs)
@@ -248,12 +271,18 @@ private struct DecimalField: View {
     @State private var text: String = ""
 
     var body: some View {
-        HStack {
-            Text(label).font(LoopDS.Typography.subheadline)
+        HStack(spacing: LoopDS.Spacing.xs) {
+            if !label.isEmpty {
+                Text(label)
+                    .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
+            }
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
+                .font(LoopDS.Typography.metric)
+                .foregroundColor(LoopDS.Colors.primary)
                 .frame(width: 80)
                 .onAppear { text = String(format: "%.1f", value) }
                 .onChange(of: text) { newText in
@@ -268,15 +297,22 @@ private struct EffectField: View {
     @Binding var value: Double
     @State private var text: String = ""
 
+    private var effectColor: Color { value >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe }
+
     var body: some View {
-        HStack {
-            Text(label).font(LoopDS.Typography.subheadline).foregroundColor(LoopDS.Colors.secondary)
+        HStack(spacing: LoopDS.Spacing.xs) {
+            if !label.isEmpty {
+                Text(label)
+                    .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
+            }
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.numbersAndPunctuation)
                 .multilineTextAlignment(.trailing)
+                .font(LoopDS.Typography.metric)
+                .foregroundColor(effectColor)
                 .frame(width: 60)
-                .foregroundColor(value >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe)
                 .onAppear { text = String(format: "%+.1f", value) }
                 .onChange(of: text) { newText in
                     if let parsed = Double(newText) { value = parsed }
