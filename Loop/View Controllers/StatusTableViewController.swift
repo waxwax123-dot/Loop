@@ -681,10 +681,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private enum ChartRow: Int, CaseIterable {
         case glucose
+        case biometrics
         case iob
         case dose
         case cob
-        case biometrics
     }
 
     private var biometricsHostController: UIHostingController<BiometricHomePanel>?
@@ -1246,7 +1246,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             case .biometrics:
-                return 180
+                return 88
             }
         case .hud, .status, .alertWarning:
             return UITableView.automaticDimension

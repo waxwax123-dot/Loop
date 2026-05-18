@@ -19,14 +19,16 @@ struct BiometricHomePanel: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            panelHeader
-            Divider()
-            metricList
+        VStack(spacing: LoopDS.Spacing.xs) {
+            HStack(spacing: LoopDS.Spacing.xs) {
+                ForEach(BiometricTileType.allCases) { tile in
+                    MetricButton(tile: tile, snapshot: latestSnapshot)
+                        .onTapGesture { selectedTile = tile }
+                }
+                IRBadgeButton(multiplier: currentMultiplier)
+            }
+            .padding(.horizontal, LoopDS.Spacing.sm)
         }
-        .background(LoopDS.Colors.surface)
-        .cornerRadius(LoopDS.Radius.card)
-        .padding(.horizontal, LoopDS.Spacing.md)
         .padding(.vertical, LoopDS.Spacing.sm)
         .onReceive(biometricsService.snapshotPublisher.receive(on: DispatchQueue.main)) { latestSnapshot = $0 }
         .onReceive(irService.multiplierPublisher.receive(on: DispatchQueue.main)) { currentMultiplier = $0 }
@@ -39,49 +41,14 @@ struct BiometricHomePanel: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Metric Button
 
-    private var panelHeader: some View {
-        HStack {
-            Text(NSLocalizedString("Biometrics", comment: "Biometrics panel section title"))
-                .font(LoopDS.Typography.headline)
-                .foregroundColor(LoopDS.Colors.primary)
-            Spacer()
-            IRBadge(multiplier: currentMultiplier)
-        }
-        .padding(.horizontal, LoopDS.Spacing.md)
-        .padding(.vertical, LoopDS.Spacing.sm)
-    }
-
-    // MARK: - Metric list
-
-    private var metricList: some View {
-        ForEach(BiometricTileType.allCases) { tile in
-            MetricRow(
-                tile: tile,
-                snapshot: latestSnapshot,
-                entry: irService.latestEntry
-            )
-            .contentShape(Rectangle())
-            .onTapGesture { selectedTile = tile }
-
-            if tile != BiometricTileType.allCases.last {
-                Divider()
-                    // Indent divider past icon + label leading edge for visual grouping
-                    .padding(.leading, LoopDS.Spacing.md + 22 + LoopDS.Spacing.sm)
-            }
-        }
-    }
-
-    // MARK: - MetricRow
-
-    private struct MetricRow: View {
+    private struct MetricButton: View {
         let tile: BiometricTileType
         let snapshot: BiometricSnapshot?
-        let entry: AppleHealthIREntry?
 
         private var rawValue: Double? {
-            guard let snapshot = snapshot else { return nil }
+            guard let snapshot else { return nil }
             switch tile {
             case .sleep:    return snapshot.sleepHours
             case .steps:    return snapshot.stepCount
@@ -91,107 +58,71 @@ struct BiometricHomePanel: View {
             }
         }
 
-        private var delta: Double? {
-            guard let entry = entry else { return nil }
-            switch tile {
-            case .sleep:    return entry.sleepDelta
-            case .steps:    return entry.stepsDelta
-            case .hrv:      return entry.hrvDelta
-            case .exercise: return entry.exerciseDelta
-            case .rhr:      return entry.rhrDelta
-            }
-        }
-
         private var formattedValue: String {
             guard let raw = rawValue else { return "--" }
             switch tile {
-            case .steps: return String(format: "%.0f %@", raw, tile.unit)
-            default:     return String(format: "%.1f %@", raw, tile.unit)
+            case .steps:
+                return raw >= 1000 ? String(format: "%.1fk", raw / 1000) : String(format: "%.0f", raw)
+            case .sleep:
+                return String(format: "%.1f", raw)
+            default:
+                return String(format: "%.0f", raw)
             }
         }
 
         var body: some View {
-            HStack(spacing: LoopDS.Spacing.sm) {
-                // Icon — biometricTint accent, fixed width for column alignment
+            VStack(spacing: 3) {
                 Image(systemName: tile.icon)
-                    .font(.subheadline)
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(LoopDS.Colors.biometricTint)
-                    .frame(width: 22, alignment: .center)
-
-                Text(tile.displayName)
-                    .font(LoopDS.Typography.subheadline)
-                    .foregroundColor(LoopDS.Colors.secondary)
-
-                Spacer()
-
-                // Monospaced digit value — stays stable as data updates
                 Text(formattedValue)
                     .font(LoopDS.Typography.metric)
                     .foregroundColor(rawValue == nil ? LoopDS.Colors.secondary : LoopDS.Colors.primary)
-
-                if let d = delta {
-                    DeltaChip(delta: d)
-                }
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+                Text(tile.unit)
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundColor(LoopDS.Colors.tertiary)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, LoopDS.Spacing.md)
-            .padding(.vertical, LoopDS.Spacing.sm + LoopDS.Spacing.xs)
-            .accessibilityLabel(accessibilityLabel)
-        }
-
-        private var accessibilityLabel: String {
-            let valueText = rawValue.map { String(format: "%.1f %@", $0, tile.unit) } ?? "no data"
-            let deltaText = delta.map { String(format: ", delta %+.0f%%", $0) } ?? ""
-            return "\(tile.displayName): \(valueText)\(deltaText)"
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, LoopDS.Spacing.sm)
+            .background(LoopDS.Colors.surface)
+            .cornerRadius(LoopDS.Radius.md)
+            .accessibilityLabel("\(tile.displayName): \(formattedValue) \(tile.unit)")
         }
     }
 
-    // MARK: - DeltaChip
+    // MARK: - IR Badge Button
 
-    private struct DeltaChip: View {
-        let delta: Double
-
-        // Positive delta raises IR (bad) = red; negative lowers IR (good) = green
-        private var chipColor: Color { delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe }
-
-        var body: some View {
-            Text(String(format: "%+.0f%%", delta))
-                .font(LoopDS.Typography.caption2.bold())
-                .padding(.horizontal, LoopDS.Spacing.sm - 2)
-                .padding(.vertical, LoopDS.Spacing.xs / 2)
-                .background(chipColor.opacity(0.15))
-                .foregroundColor(chipColor)
-                .cornerRadius(LoopDS.Radius.sm)
-        }
-    }
-
-    // MARK: - IRBadge
-
-    private struct IRBadge: View {
+    private struct IRBadgeButton: View {
         let multiplier: Double
 
-        private var badgeColor: Color {
+        private var color: Color {
             if multiplier < 1.1 { return LoopDS.Colors.glucoseSafe }
             if multiplier < 1.5 { return LoopDS.Colors.glucoseWarning }
             return LoopDS.Colors.glucoseUrgent
         }
 
         var body: some View {
-            Text(String(format: "IR \u{00D7}%.2f", multiplier))
-                .font(LoopDS.Typography.caption.bold())
-                .padding(.horizontal, LoopDS.Spacing.sm)
-                .padding(.vertical, LoopDS.Spacing.xs)
-                .background(badgeColor.opacity(0.18))
-                .foregroundColor(badgeColor)
-                .cornerRadius(LoopDS.Radius.sm)
-                .accessibilityLabel(
-                    String(
-                        format: NSLocalizedString(
-                            "Insulin resistance multiplier %.2f",
-                            comment: "IR badge accessibility label"
-                        ),
-                        multiplier
-                    )
-                )
+            VStack(spacing: 3) {
+                Image(systemName: "waveform.path.ecg")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(color)
+                Text(String(format: "×%.2f", multiplier))
+                    .font(LoopDS.Typography.metric)
+                    .foregroundColor(color)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+                Text("IR")
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundColor(LoopDS.Colors.tertiary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, LoopDS.Spacing.sm)
+            .background(color.opacity(0.12))
+            .cornerRadius(LoopDS.Radius.md)
+            .accessibilityLabel(String(format: "Insulin resistance multiplier %.2f", multiplier))
         }
     }
 }
