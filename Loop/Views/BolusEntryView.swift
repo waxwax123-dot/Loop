@@ -78,7 +78,7 @@ struct BolusEntryView: View {
 
     private var chartSection: some View {
         Section {
-            VStack(spacing: 8) {
+            VStack(spacing: LoopDS.Spacing.sm) {
                 HStack(spacing: 0) {
                     activeCarbsLabel
                     Spacer(minLength: 8)
@@ -109,7 +109,7 @@ struct BolusEntryView: View {
                         HStack {
                             Text("Forecasted blood glucose may still be higher than target range.")
                                 .font(.footnote)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(LoopDS.Colors.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                             Image(systemName: "info.circle")
                                 .font(.system(size: 25))
@@ -160,7 +160,7 @@ struct BolusEntryView: View {
 
     private var summarySection: some View {
         Section {
-            VStack(spacing: 16) {
+            VStack(spacing: LoopDS.Spacing.md) {
                 titleText
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -173,8 +173,8 @@ struct BolusEntryView: View {
                     recommendedBolusRow
                 }
             }
-            .padding(.top, 8)
-            
+            .padding(.top, LoopDS.Spacing.sm)
+
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
@@ -217,6 +217,7 @@ struct BolusEntryView: View {
     private var recommendedBolusRow: some View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
+                .foregroundColor(LoopDS.Colors.insulinTint)
             Spacer()
             HStack(alignment: .firstTextBaseline) {
                 Text(viewModel.recommendedBolusString)
@@ -238,6 +239,7 @@ struct BolusEntryView: View {
     private var bolusEntryRow: some View {
         HStack {
             Text("Bolus", comment: "Label for bolus entry row on bolus screen")
+                .foregroundColor(LoopDS.Colors.insulinTint)
             Spacer()
             HStack(alignment: .firstTextBaseline) {
                 TextField(viewModel.formatBolusAmount(0.0), text: enteredBolusStringBinding)
@@ -273,7 +275,7 @@ struct BolusEntryView: View {
 
     private var bolusUnitsLabel: some View {
         Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
-            .foregroundColor(Color(.secondaryLabel))
+            .foregroundColor(LoopDS.Colors.secondary)
     }
 
     private var enteredBolusStringBinding: Binding<String> {
@@ -484,8 +486,8 @@ struct LabeledQuantity: View {
 struct LabelBackground: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, LoopDS.Spacing.sm)
+            .padding(.vertical, LoopDS.Spacing.xs)
             .background(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .fill(Color(.systemGray6))

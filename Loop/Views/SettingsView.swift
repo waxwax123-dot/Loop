@@ -201,7 +201,7 @@ extension SettingsView {
             Toggle(isOn: closedLoopToggleState) {
                 VStack(alignment: .leading) {
                     Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
-                        .padding(.vertical, 3)
+                        .padding(.vertical, LoopDS.Spacing.xs)
                     if !viewModel.isOnboardingComplete {
                         DescriptiveText(label: NSLocalizedString("Closed Loop requires Setup to be Complete", comment: "The description text for the looping enabled switch cell when onboarding is not complete"))
                     } else if let closedLoopDescriptiveText = viewModel.closedLoopDescriptiveText {
@@ -246,7 +246,7 @@ extension SettingsView {
                 .foregroundColor(.white)
                 .padding(5)
                 .background(guidanceColors.warning)
-                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: LoopDS.Radius.sm, style: .continuous))
         }
     }
 
@@ -504,7 +504,7 @@ extension SettingsView {
             footer: Text(footerLabel)
         ) {
             if nearExpiration {
-                Text(expirationMessage).foregroundColor(.red)
+                Text(expirationMessage).foregroundColor(LoopDS.Colors.glucoseUrgent)
             } else {
                 HStack {
                     Text(expirationLabel)
@@ -531,8 +531,8 @@ extension SettingsView {
         Image(systemName: "plus.circle")
             .resizable()
             .scaledToFit()
-            .accentColor(Color(.systemGray))
-            .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
+            .accentColor(LoopDS.Colors.secondary)
+            .padding(EdgeInsets(top: LoopDS.Spacing.sm, leading: LoopDS.Spacing.sm, bottom: LoopDS.Spacing.sm, trailing: LoopDS.Spacing.sm))
     }
     
     @ViewBuilder
@@ -579,7 +579,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     }
 
     // TODO: The design doesn't show this, but do we need to consider different values here for different size classes?
-    private let spacing: CGFloat = 15
+    private let spacing: CGFloat = LoopDS.Spacing.md
     private let imageWidth: CGFloat = 60
     private let imageHeight: CGFloat = 60
     private let secondaryImageWidth: CGFloat = 30
@@ -608,7 +608,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                 
                 if includeArrow {
                     // TODO: Ick. I can't use a NavigationLink because we're not Navigating, but this seems worse somehow.
-                    Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
+                    Image(systemName: "chevron.right").foregroundColor(LoopDS.Colors.secondary).font(.footnote)
                 }
             }
             .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))

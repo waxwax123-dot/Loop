@@ -92,44 +92,88 @@ struct BiometricIRDetailView: View {
     }
 
     private var currentValueSection: some View {
-        Section(header: Text(NSLocalizedString("Current", comment: "Section header"))) {
+        Section {
             if let entry = entry, let raw = tileType.rawValue(from: entry) {
-                HStack {
-                    Text(String(format: "%.1f %@", raw, tileType.unit))
-                        .font(.title2)
+                let delta = tileType.delta(from: entry)
+                let deltaColor: Color = delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe
+                HStack(alignment: .firstTextBaseline, spacing: LoopDS.Spacing.sm) {
+                    // Icon anchors the row with biometric tint
+                    Image(systemName: tileType.icon)
+                        .font(.title3)
+                        .foregroundColor(LoopDS.Colors.biometricTint)
+                    // Dominant readout value in monospaced type
+                    Text(String(format: "%.1f", raw))
+                        .font(LoopDS.Typography.readout)
+                        .foregroundColor(LoopDS.Colors.primary)
+                    Text(tileType.unit)
+                        .font(LoopDS.Typography.subheadline)
+                        .foregroundColor(LoopDS.Colors.secondary)
                     Spacer()
-                    let delta = tileType.delta(from: entry)
+                    // Delta badge — color-coded for IR direction
                     Text(String(format: "%+.1f%%", delta))
-                        .foregroundColor(delta >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
+                        .font(LoopDS.Typography.metric)
+                        .padding(.horizontal, LoopDS.Spacing.sm)
+                        .padding(.vertical, LoopDS.Spacing.xs)
+                        .background(deltaColor.opacity(0.15))
+                        .foregroundColor(deltaColor)
+                        .cornerRadius(LoopDS.Radius.sm)
                 }
+                .padding(.vertical, LoopDS.Spacing.xs)
             } else {
                 Text(NSLocalizedString("No data", comment: "No biometric data available"))
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .foregroundColor(LoopDS.Colors.secondary)
             }
+        } header: {
+            Text(NSLocalizedString("Current", comment: "Section header"))
+                .font(LoopDS.Typography.caption.bold())
+                .foregroundColor(LoopDS.Colors.secondary)
+                .textCase(nil)
         }
     }
 
     private var thresholdBandSection: some View {
-        Section(header: Text(NSLocalizedString("Thresholds", comment: "Section header"))) {
+        Section {
             if let entry = entry {
                 let t = entry.thresholdsSnapshot
+                // Aligned column header row
+                HStack(spacing: LoopDS.Spacing.sm) {
+                    Text(NSLocalizedString("Zone", comment: "Threshold zone column header"))
+                        .frame(width: 56, alignment: .leading)
+                    Text(NSLocalizedString("Range", comment: "Threshold range column header"))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(NSLocalizedString("Effect", comment: "Threshold effect column header"))
+                        .frame(width: 60, alignment: .trailing)
+                }
+                .font(LoopDS.Typography.caption.bold())
+                .foregroundColor(LoopDS.Colors.secondary)
+                .padding(.vertical, LoopDS.Spacing.xs)
                 ForEach(bands(for: t), id: \.label) { band in
                     ThresholdRow(label: band.label, range: band.range, effect: band.effect)
                 }
             }
+        } header: {
+            Text(NSLocalizedString("Thresholds", comment: "Section header"))
+                .font(LoopDS.Typography.caption.bold())
+                .foregroundColor(LoopDS.Colors.secondary)
+                .textCase(nil)
         }
     }
 
     private var historySection: some View {
-        Section(header: Text(NSLocalizedString("Last 24 Hours", comment: "Section header"))) {
+        Section {
             if allEntries.isEmpty {
                 Text(NSLocalizedString("No history", comment: "No history entries"))
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .foregroundColor(LoopDS.Colors.secondary)
             } else {
                 ForEach(allEntries.reversed()) { entry in
                     HistoryRow(entry: entry, tileType: tileType)
                 }
             }
+        } header: {
+            Text(NSLocalizedString("Last 24 Hours", comment: "Section header"))
+                .font(LoopDS.Typography.caption.bold())
+                .foregroundColor(LoopDS.Colors.secondary)
+                .textCase(nil)
         }
     }
 
@@ -191,15 +235,26 @@ struct BiometricIRDetailView: View {
         let range: String
         let effect: Double
 
+        private var effectColor: Color {
+            effect >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe
+        }
+
         var body: some View {
-            HStack {
-                Text(label).frame(width: 80, alignment: .leading)
-                Text(range).foregroundColor(LoopDS.Colors.secondaryLabel)
-                Spacer()
+            HStack(spacing: LoopDS.Spacing.sm) {
+                Text(label)
+                    .font(LoopDS.Typography.subheadline.weight(.medium))
+                    .foregroundColor(LoopDS.Colors.primary)
+                    .frame(width: 56, alignment: .leading)
+                Text(range)
+                    .font(LoopDS.Typography.subheadline)
+                    .foregroundColor(LoopDS.Colors.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text(String(format: "%+.0f%%", effect))
-                    .foregroundColor(effect >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
+                    .font(LoopDS.Typography.metric)
+                    .foregroundColor(effectColor)
+                    .frame(width: 60, alignment: .trailing)
             }
-            .font(LoopDS.Typography.metricLabel)
+            .padding(.vertical, LoopDS.Spacing.xs)
         }
     }
 
@@ -210,16 +265,16 @@ struct BiometricIRDetailView: View {
         var body: some View {
             HStack {
                 Text(entry.timestamp, style: .time)
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
-                    .font(LoopDS.Typography.historyTime)
+                    .foregroundColor(LoopDS.Colors.secondary)
+                    .font(LoopDS.Typography.caption)
                 Spacer()
                 let delta = tileType.delta(from: entry)
                 Text(String(format: "%+.1f%%", delta))
-                    .foregroundColor(delta >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
-                    .font(LoopDS.Typography.historyValue)
+                    .foregroundColor(delta >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe)
+                    .font(LoopDS.Typography.metric)
                 Text(entry.formattedMultiplier)
-                    .font(LoopDS.Typography.historyTime)
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
             }
         }
     }
