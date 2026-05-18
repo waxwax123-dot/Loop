@@ -122,12 +122,12 @@ struct AppleHealthIRThresholdsView: View {
             Section {
                 DisclosureGroup(isExpanded: $clampExpanded) {
                     HStack {
-                        Text(NSLocalizedString("Min multiplier", comment: "Settings label")).font(.subheadline)
+                        Text(NSLocalizedString("Min multiplier", comment: "Settings label")).font(LoopDS.Typography.metricLabel)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMin)
                     }
                     HStack {
-                        Text(NSLocalizedString("Max multiplier", comment: "Settings label")).font(.subheadline)
+                        Text(NSLocalizedString("Max multiplier", comment: "Settings label")).font(LoopDS.Typography.metricLabel)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMax)
                     }
@@ -143,7 +143,7 @@ struct AppleHealthIRThresholdsView: View {
 
             if let error = validationError {
                 Section {
-                    Text(error).foregroundColor(.red).font(.footnote)
+                    Text(error).foregroundColor(LoopDS.Colors.negative).font(.footnote)
                 }
             }
         }
@@ -183,11 +183,11 @@ struct AppleHealthIRThresholdsView: View {
     @ViewBuilder
     private func metricLabel(name: String, summary: String) -> some View {
         HStack {
-            Text(name).font(.subheadline)
+            Text(name).font(LoopDS.Typography.metricLabel)
             Spacer()
             Text(summary)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(LoopDS.Typography.historyTime)
+                .foregroundColor(LoopDS.Colors.secondaryLabel)
         }
     }
 
@@ -196,21 +196,21 @@ struct AppleHealthIRThresholdsView: View {
         thresholds: [(String, Binding<Double>)],
         effects: [(String, Binding<Double>)]
     ) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: LoopDS.Spacing.xs) {
             HStack {
                 Text(NSLocalizedString("Thresholds", comment: "Grid column header"))
-                    .font(.caption.bold())
-                    .foregroundColor(.secondary)
+                    .font(LoopDS.Typography.sectionHeader)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(NSLocalizedString("Effects", comment: "Grid column header"))
-                    .font(.caption.bold())
-                    .foregroundColor(.secondary)
+                    .font(LoopDS.Typography.sectionHeader)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.top, 4)
+            .padding(.top, LoopDS.Spacing.xs)
 
             ForEach(0..<thresholds.count, id: \.self) { i in
-                HStack(spacing: 8) {
+                HStack(spacing: LoopDS.Spacing.sm) {
                     DecimalField(label: thresholds[i].0, value: thresholds[i].1)
                         .frame(maxWidth: .infinity)
                     Divider()
@@ -219,7 +219,7 @@ struct AppleHealthIRThresholdsView: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, LoopDS.Spacing.xs)
     }
 
     private func save() {
@@ -249,7 +249,7 @@ private struct DecimalField: View {
 
     var body: some View {
         HStack {
-            Text(label).font(.subheadline)
+            Text(label).font(LoopDS.Typography.metricLabel)
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.decimalPad)
@@ -270,13 +270,13 @@ private struct EffectField: View {
 
     var body: some View {
         HStack {
-            Text(label).font(.subheadline).foregroundColor(.secondary)
+            Text(label).font(LoopDS.Typography.metricLabel).foregroundColor(LoopDS.Colors.secondaryLabel)
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.numbersAndPunctuation)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 60)
-                .foregroundColor(value >= 0 ? .red : .green)
+                .foregroundColor(value >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
                 .onAppear { text = String(format: "%+.1f", value) }
                 .onChange(of: text) { newText in
                     if let parsed = Double(newText) { value = parsed }

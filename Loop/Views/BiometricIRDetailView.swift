@@ -100,11 +100,11 @@ struct BiometricIRDetailView: View {
                     Spacer()
                     let delta = tileType.delta(from: entry)
                     Text(String(format: "%+.1f%%", delta))
-                        .foregroundColor(delta >= 0 ? .red : .green)
+                        .foregroundColor(delta >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
                 }
             } else {
                 Text(NSLocalizedString("No data", comment: "No biometric data available"))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
             }
         }
     }
@@ -124,7 +124,7 @@ struct BiometricIRDetailView: View {
         Section(header: Text(NSLocalizedString("Last 24 Hours", comment: "Section header"))) {
             if allEntries.isEmpty {
                 Text(NSLocalizedString("No history", comment: "No history entries"))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
             } else {
                 ForEach(allEntries.reversed()) { entry in
                     HistoryRow(entry: entry, tileType: tileType)
@@ -194,12 +194,12 @@ struct BiometricIRDetailView: View {
         var body: some View {
             HStack {
                 Text(label).frame(width: 80, alignment: .leading)
-                Text(range).foregroundColor(.secondary)
+                Text(range).foregroundColor(LoopDS.Colors.secondaryLabel)
                 Spacer()
                 Text(String(format: "%+.0f%%", effect))
-                    .foregroundColor(effect >= 0 ? .red : .green)
+                    .foregroundColor(effect >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
             }
-            .font(.subheadline)
+            .font(LoopDS.Typography.metricLabel)
         }
     }
 
@@ -210,16 +210,16 @@ struct BiometricIRDetailView: View {
         var body: some View {
             HStack {
                 Text(entry.timestamp, style: .time)
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .font(LoopDS.Typography.historyTime)
                 Spacer()
                 let delta = tileType.delta(from: entry)
                 Text(String(format: "%+.1f%%", delta))
-                    .foregroundColor(delta >= 0 ? .red : .green)
-                    .font(.caption)
+                    .foregroundColor(delta >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
+                    .font(LoopDS.Typography.historyValue)
                 Text(entry.formattedMultiplier)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(LoopDS.Typography.historyTime)
+                    .foregroundColor(LoopDS.Colors.secondaryLabel)
             }
         }
     }
