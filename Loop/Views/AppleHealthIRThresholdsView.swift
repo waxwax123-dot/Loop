@@ -122,12 +122,12 @@ struct AppleHealthIRThresholdsView: View {
             Section {
                 DisclosureGroup(isExpanded: $clampExpanded) {
                     HStack {
-                        Text(NSLocalizedString("Min multiplier", comment: "Settings label")).font(LoopDS.Typography.metricLabel)
+                        Text(NSLocalizedString("Min multiplier", comment: "Settings label")).font(LoopDS.Typography.subheadline)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMin)
                     }
                     HStack {
-                        Text(NSLocalizedString("Max multiplier", comment: "Settings label")).font(LoopDS.Typography.metricLabel)
+                        Text(NSLocalizedString("Max multiplier", comment: "Settings label")).font(LoopDS.Typography.subheadline)
                         Spacer()
                         DecimalField(label: "", value: $draft.multiplierMax)
                     }
@@ -143,7 +143,7 @@ struct AppleHealthIRThresholdsView: View {
 
             if let error = validationError {
                 Section {
-                    Text(error).foregroundColor(LoopDS.Colors.negative).font(.footnote)
+                    Text(error).foregroundColor(LoopDS.Colors.glucoseUrgent).font(.footnote)
                 }
             }
         }
@@ -183,11 +183,11 @@ struct AppleHealthIRThresholdsView: View {
     @ViewBuilder
     private func metricLabel(name: String, summary: String) -> some View {
         HStack {
-            Text(name).font(LoopDS.Typography.metricLabel)
+            Text(name).font(LoopDS.Typography.subheadline)
             Spacer()
             Text(summary)
-                .font(LoopDS.Typography.historyTime)
-                .foregroundColor(LoopDS.Colors.secondaryLabel)
+                .font(LoopDS.Typography.caption)
+                .foregroundColor(LoopDS.Colors.secondary)
         }
     }
 
@@ -199,12 +199,12 @@ struct AppleHealthIRThresholdsView: View {
         VStack(spacing: LoopDS.Spacing.xs) {
             HStack {
                 Text(NSLocalizedString("Thresholds", comment: "Grid column header"))
-                    .font(LoopDS.Typography.sectionHeader)
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(NSLocalizedString("Effects", comment: "Grid column header"))
-                    .font(LoopDS.Typography.sectionHeader)
-                    .foregroundColor(LoopDS.Colors.secondaryLabel)
+                    .font(LoopDS.Typography.caption)
+                    .foregroundColor(LoopDS.Colors.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.top, LoopDS.Spacing.xs)
@@ -249,7 +249,7 @@ private struct DecimalField: View {
 
     var body: some View {
         HStack {
-            Text(label).font(LoopDS.Typography.metricLabel)
+            Text(label).font(LoopDS.Typography.subheadline)
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.decimalPad)
@@ -270,13 +270,13 @@ private struct EffectField: View {
 
     var body: some View {
         HStack {
-            Text(label).font(LoopDS.Typography.metricLabel).foregroundColor(LoopDS.Colors.secondaryLabel)
+            Text(label).font(LoopDS.Typography.subheadline).foregroundColor(LoopDS.Colors.secondary)
             Spacer()
             TextField("", text: $text)
                 .keyboardType(.numbersAndPunctuation)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 60)
-                .foregroundColor(value >= 0 ? LoopDS.Colors.negative : LoopDS.Colors.positive)
+                .foregroundColor(value >= 0 ? LoopDS.Colors.glucoseUrgent : LoopDS.Colors.glucoseSafe)
                 .onAppear { text = String(format: "%+.1f", value) }
                 .onChange(of: text) { newText in
                     if let parsed = Double(newText) { value = parsed }
